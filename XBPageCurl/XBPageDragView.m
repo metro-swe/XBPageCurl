@@ -74,7 +74,7 @@
 - (void)refreshPageCurlView
 {
     XBPageCurlView *pageCurlView = [[XBPageCurlView alloc] initWithFrame:self.viewToCurl.frame];
-    pageCurlView.pageOpaque = YES;
+    pageCurlView.pageOpaque = NO;
     pageCurlView.opaque = NO;
     pageCurlView.snappingEnabled = YES;
     [pageCurlView drawViewOnFrontOfPage:self.viewToCurl];
@@ -120,13 +120,15 @@
 {
     if (self.pageIsCurled) {
         UITouch *touch = [touches anyObject];
-        CGPoint touchLocation = [touch locationInView:self.viewToCurl.superview];
+        CGPoint touchLocation = [touch locationInView:self.viewToCurl];
         [self.pageCurlView touchMovedToPoint:touchLocation];
     }
 }
 
 - (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event
 {
+    [[NSNotificationCenter defaultCenter] postNotificationName:@"dragDidEnd" object:nil userInfo:nil];
+
     if (self.pageIsCurled) {
         UITouch *touch = [touches anyObject];
         CGPoint touchLocation = [touch locationInView:self.viewToCurl.superview];
@@ -136,6 +138,8 @@
 
 - (void)touchesCancelled:(NSSet *)touches withEvent:(UIEvent *)event
 {
+    [[NSNotificationCenter defaultCenter] postNotificationName:@"dragDidEnd" object:nil userInfo:nil];
+
     if (self.pageIsCurled) {
         UITouch *touch = [touches anyObject];
         CGPoint touchLocation = [touch locationInView:self.viewToCurl.superview];
@@ -148,7 +152,7 @@
 - (void)pageCurlViewDidSnapToPointNotification:(NSNotification *)notification
 {
     XBSnappingPoint *snappingPoint = notification.userInfo[kXBSnappingPointKey];
-    if (snappingPoint == self.cornerSnappingPoint) {
+    if (snappingPoint.tag == 0) {
         self.hidden = NO;
         _pageIsCurled = NO;
         self.viewToCurl.hidden = NO;

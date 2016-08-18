@@ -11,7 +11,7 @@
 
 @interface XBPageDragView : UIView
 
-@property (nonatomic, strong) IBOutlet UIView *viewToCurl;
+@property (nonatomic, weak) IBOutlet UIView *viewToCurl;
 @property (nonatomic, readonly) BOOL pageIsCurled;
 @property (nonatomic, readonly) XBPageCurlView *pageCurlView;
 @property (nonatomic, readonly) XBSnappingPoint *cornerSnappingPoint;

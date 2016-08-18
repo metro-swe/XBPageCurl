@@ -138,29 +138,28 @@
 
 - (void)touchEndedAtPoint:(CGPoint)p
 {
+    NSLog(@">>> %f - %f", p.x, p.y);
+    
     if (self.snappingEnabled && self.snappingPointArray.count > 0) {
-        XBSnappingPoint *closestSnappingPoint = nil;
-        CGFloat d = FLT_MAX;
-        CGPoint v = CGPointMake(cosf(self.cylinderAngle), sinf(self.cylinderAngle));
-        //Find the snapping point closest to the cylinder axis
-        for (XBSnappingPoint *snappingPoint in self.snappingPointArray) {
-            //Compute the distance between the snappingPoint.position and the cylinder axis weighted by the snapping point weight
-            CGFloat weightedSquareDistance = CGPointToLineDistance(snappingPoint.position, self.cylinderPosition, v) / snappingPoint.weight;
-            if (weightedSquareDistance < d) {
-                closestSnappingPoint = snappingPoint;
-                d = weightedSquareDistance;
-            }
+        
+        XBSnappingPoint *closestSnappingPoint = [[XBSnappingPoint alloc] init];
+        
+        CGFloat snapPosition = [[UIScreen mainScreen] bounds].size.width * 0.75;
+        NSLog(@"snapPosition: %f", snapPosition);
+        if (p.x > snapPosition) {
+            closestSnappingPoint.tag = 3;
+            __weak XBPageCurlView *weakSelf = self;
+            [self setCylinderPosition:CGPointMake([[UIScreen mainScreen] bounds].size.width * 2, 0) cylinderAngle:-M_PI_4*2 cylinderRadius:50 animatedWithDuration:kDuration completion:^{
+                [[NSNotificationCenter defaultCenter] postNotificationName:XBPageCurlViewDidSnapToPointNotification object:weakSelf userInfo:@{kXBSnappingPointKey: closestSnappingPoint}];
+            }];
+            
+        } else {
+            closestSnappingPoint.tag = 0;
+            __weak XBPageCurlView *weakSelf = self;
+            [self setCylinderPosition:CGPointMake(0, 0) cylinderAngle:0 cylinderRadius:50 animatedWithDuration:kDuration completion:^{
+                [[NSNotificationCenter defaultCenter] postNotificationName:XBPageCurlViewDidSnapToPointNotification object:weakSelf userInfo:@{kXBSnappingPointKey: closestSnappingPoint}];
+            }];
         }
-        
-        NSAssert(closestSnappingPoint != nil, @"There is always a closest point in a non-empty set of points hence closestSnappingPoint should not be nil.");
-        
-        [[NSNotificationCenter defaultCenter] postNotificationName:XBPageCurlViewWillSnapToPointNotification object:self userInfo:@{kXBSnappingPointKey: closestSnappingPoint}];
-        
-        __weak XBPageCurlView *weakSelf = self;
-        CGFloat angle = CLAMP(closestSnappingPoint.angle, self.minimumCylinderAngle, self.maximumCylinderAngle);
-        [self setCylinderPosition:closestSnappingPoint.position cylinderAngle:angle cylinderRadius:closestSnappingPoint.radius animatedWithDuration:kDuration completion:^{
-            [[NSNotificationCenter defaultCenter] postNotificationName:XBPageCurlViewDidSnapToPointNotification object:weakSelf userInfo:@{kXBSnappingPointKey: closestSnappingPoint}];
-        }];
     }
 }
 
