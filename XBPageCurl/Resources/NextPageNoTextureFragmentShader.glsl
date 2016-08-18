@@ -14,5 +14,5 @@ void main()
     vec2 v = v_position - u_cylinderPosition;
     float d = dot(v, dir);
     float l = 0.6 - 0.6*smoothstep(0.5, 0.8, d/(2.0*u_cylinderRadius));
-    gl_FragColor = vec4(0.0, 0.0, 0.0, l);
+    gl_FragColor = vec4(0.0, 0.0, 0.0, 0.0);
 }
